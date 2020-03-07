@@ -1,0 +1,4 @@
+COMMON DEF HOGE
+ ?"HOGE"
+END
+
