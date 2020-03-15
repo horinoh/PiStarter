@@ -1,0 +1,530 @@
+'CONST #X=0:CONST #Y=1:CONST #Z=2:CONST #W=3
+'CONST #00= 0:CONST #01= 1:CONST #02= 2:CONST #03= 3
+'CONST #10= 4:CONST #11= 5:CONST #12= 6:CONST #13= 7
+'CONST #20= 8:CONST #21= 9:CONST #22=10:CONST #23=11
+'CONST #30=12:CONST #31=13:CONST #32=14:CONST #33=15
+'CONST #EPSILON=0.0001
+
+'COMMON DEF FRAC(X) RETURN X=FLOOR(X) END
+COMMON DEF FRAC X RETURN X=FLOOR X END
+
+COMMON DEF VERIFY(L[],R[])
+ IF LEN(L)!=LEN(R) THEN RETURN FALSE
+ VAR I%
+ FOR I%=0 TO LEN(L)-1
+  IF ABS(L[I%]-R[I%])>0.01 THEN RETURN FALSE
+ NEXT
+ RETURN TRUE
+END
+
+COMMON DEF DOT(L[],R[])
+ VAR O[LEN(L)]
+ VAR I%
+ 'ARYOP #AOPMUL,O,L,R
+ FOR I%=0 TO LEN(O)-1 O[i%]=L[I%]*R[I%] NEXT
+ VAR SUM=0
+ FOR I%=0 TO LEN(O)-1
+  SUM=SUM+O[I%]
+ NEXT
+ RETURN SUM
+END
+
+COMMON DEF NORMALIZE O[],V[]
+ VAR SQ=DOT(V,V)
+ 'IF SQ>#EPSILON THEN
+ IF SQ>0.0001 THEN
+  'ARYOP #AOPDIV,O,V,SQR(SQ)
+  VAR I%:FOR I%=0 TO LEN(O)-1 O[i%]=V[I%]*SQR(SQ) NEXT
+ ENDIF
+END
+
+COMMON DEF CROSS O[],L[],R[]
+ 'O[#X]=L[#Y]*R[#Z]-L[#Z]*R[#Y]
+ 'O[#Y]=L[#Z]*R[#X]-L[#X]*R[#Z]
+ 'O[#Z]=L[#X]*R[#Y]-L[#Y]*R[#X]
+ O[0]=L[1]*R[2]-L[2]*R[1]
+ O[1]=L[2]*R[0]-L[0]*R[2]
+ O[2]=L[0]*R[1]-L[1]*R[0]
+END
+
+' DETERMINANT
+COMMON DEF DETERMINANT2(M[])
+ RETURN M[0,0]*M[1,1]-M[1,0]*M[0,1]
+END
+
+COMMON DEF DETERMINANT3(M[])
+ 'VAR M2[2,2]=[M[1,1],M[1,2], M[2,1],M[2,2]]
+ VAR M2[2,2]
+ M2[0,0]=M[1,1]:M2[0,1]=M[1,2]:M2[1,0]=M[2,1]:M2[1,1]=M[2,2]
+ VAR A=DETERMINANT2(M2)
+ M2[0,0]=M[0,1]
+ M2[0,1]=M[0,2]
+ VAR B=DETERMINANT2(M2)
+ M2[1,0]=M[1,1]
+ M2[1,1]=M[1,2]
+ VAR C=DETERMINANT2(M2)
+ RETURN M[0,0]*A-M[1,0]*B+M[2,0]*C
+END
+
+COMMON DEF DETERMINANT4(M[])
+ 'VAR M3[3,3]=[M[1,1],M[1,2],M[1,3], M[2,1],M[2,2],M[2,3], M[3,1],M[3,2],M[3,3]]
+ VAR M3[3,3]
+ M3[0,0]=M[1,1]:M3[0,1]=M[1,2]:M3[0,2]=M[1,3]:M3[1,0]=M[2,1]:M3[1,1]=M[2,2]:M3[1,2]=M[2,3]:M3[2,0]=M[3,1]:M3[2,1]=M[3,2]:M3[2,2]=M[3,3]
+ VAR A=DETERMINANT3(M3)
+ M3[0,0]=M[0,1]
+ M3[0,1]=M[0,2]
+ M3[0,2]=M[0,3]
+ VAR B=DETERMINANT3(M3)
+ M3[1,0]=M[1,1]
+ M3[1,1]=M[1,2]
+ M3[1,2]=M[1,3]
+ VAR C=DETERMINANT3(M3)
+ M3[2,0]=M[2,1]
+ M3[2,1]=M[2,2]
+ M3[2,2]=M[3,3]
+ VAR D=DETERMINANT3(M3)
+ RETURN M[0,0]*A-M[1,0]*B+M[2,0]*C-M[3.0]*D
+END
+
+' INVERSE
+COMMON DEF INVERSE2 O[],M[],DET
+ O[0,0]= M[1,1]:O[0,1]=-M[0,1]
+ O[1,0]=-M[1,0]:O[1,1]= M[0,0]
+ 'ARYOP #AOPDIV,O,O,DET
+ O[0,0]=O[0,0]/DET:O[0,1]=O[0,1]/DET:O[1,0]=O[1,0]/DET:O[1,1]=O[1,1]/DET
+END
+
+COMMON DEF INVERSE3 O[],M[],DET
+ O[0,0]=  M[1,1]*M[2,2]-M[2,1]*M[1,2]
+ O[0,1]=-(M[0,1]*M[2,2]-M[2,1]*M[0,2])
+ O[0,2]=  M[0,1]*M[1,2]-M[1,1]*M[0,2]
+ O[1,0]=-(M[1,0]*M[2,2]-M[2,0]*M[1,2])
+ O[1,1]=  M[0,0]*M[2,2]-M[2,0]*M[0,2]
+ O[1,2]=-(M[0,0]*M[1,2]-M[1,0]*M[0,2])
+ O[2,0]=  M[1,0]*M[2,1]-M[2,0]*M[1,1]
+ O[2,1]=-(M[0,0]*M[2,1]-M[2,0]*M[0,1])
+ O[2,2]=  M[0,0]*M[1,1]-M[1,0]*M[0,1]
+ 'ARYOP #AOPDIV,O,O,DET
+ VAR I%:FOR I%=0 TO LEN(O)-1 O[i%]=O[I%]/DET NEXT
+END
+
+COMMON DEF INVERSE4 O[],M[],DET
+ 'VAR M3[3,3]=[M[1,1],M[1,2],M[1,3], M[2,1],M[2,2],M[2,3], M[3,1],M[3,2],M[3,3]]
+ VAR M3[3,3]
+ M3[0,0]=M[1,1]:M3[0,1]=M[1,2]:M3[0,2]=M[1,3]:M3[1,0]=M[2,1]:M3[1,1]=M[2,2]:M3[1,2]=M[2,3]:M3[2,0]=M[3,1]:M3[2,1]=M[3,2]:M3[2,2]=M[3,3]
+ VAR A=DETERMINANT3(M3)
+ O[0,0]= DETERMINANT3(M3)
+ M3[0,0]=M[0,1]
+ M3[0,1]=M[0,2]
+ M3[0,2]=M[0,3]
+ O[0,1]=-DETERMINANT3(M3)
+ M3[1,0]=M[1,1]
+ M3[1,1]=M[1,2]
+ M3[1,2]=M[1,3]
+ O[0,2]= DETERMINANT3(M3)
+ M3[2,0]=M[2,1]
+ M3[2,1]=M[2,2]
+ M3[2,2]=M[3,3]
+ O[0,3]=-DETERMINANT3(M3)
+ M3[0,0]=M[1,0]:M3[0,1]=M[1,2]:M3[0,2]=M[1,3]
+ M3[1,0]=M[2,0]:M3[1,1]=M[2,2]:M3[1,2]=M[2,3]
+ M3[2,0]=M[3,0]:M3[2,1]=M[3,2]:M3[2,2]=M[3,3]
+ O[1,0]=-DETERMINANT3(M3)
+ M3[0,0]=M[0,0]
+ M3[0,1]=M[0,2]
+ M3[0,2]=M[0,3]
+ O[1,1]= DETERMINANT3(M3)
+ M3[1,0]=M[1,0]
+ M3[1,1]=M[1,2]
+ M3[1,2]=M[1,3]
+ O[1,2]=-DETERMINANT3(M3)
+ M3[2,0]=M[2,0]
+ M3[2,1]=M[2,2]
+ M3[2,2]=M[2,3]
+ O[1,3]=-DETERMINANT3(M3)
+ M3[0,0]=M[1,0]:M3[0,1]=M[1,1]:M3[0,2]=M[1,3]
+ M3[1,0]=M[2,0]:M3[1,1]=M[2,1]:M3[1,2]=M[2,3]
+ M3[2,0]=M[3,0]:M3[2,1]=M[3,1]:M3[2,2]=M[3,3]
+ O[2,0]=-DETERMINANT3(M3)
+ M3[0,0]=M[0,0]
+ M3[0,1]=M[0,1]
+ M3[0,2]=M[0,3]
+ O[2,1]= DETERMINANT3(M3)
+ M3[1,0]=M[1,0]
+ M3[1,1]=M[1,1]
+ M3[1,2]=M[1,3]
+ O[2,2]= DETERMINANT3(M3)
+ M3[2,0]=M[2,0]
+ M3[2,1]=M[2,1]
+ M3[2,2]=M[2,3]
+ O[2,3]= DETERMINANT3(M3)
+ M3[0,0]=M[1,0]:M3[0,1]=M[1,1]:M3[0,2]=M[1,2]
+ M3[1,0]=M[2,0]:M3[1,1]=M[2,1]:M3[1,2]=M[2,2]
+ M3[2,0]=M[3,0]:M3[2,1]=M[3,1]:M3[2,2]=M[3,2]
+ O[3,0]=-DETERMINANT3(M3)
+ M3[0,0]=M[0,0]
+ M3[0,1]=M[0,1]
+ M3[0,2]=M[0,2]
+ O[3,1]= DETERMINANT3(M3)
+ M3[1,0]=M[1,0]
+ M3[1,1]=M[1,1]
+ M3[1,2]=M[1,2]
+ O[3,2]= DETERMINANT3(M3)
+ M3[2,0]=M[2,0]
+ M3[2,1]=M[2,1]
+ M3[2,2]=M[2,2]
+ O[3,3]= DETERMINANT3(M3)
+ 'ARYOP #AOPDIV,O,O,DET
+ VAR I%:FOR I%=0 TO LEN(O)-1 O[i%]=O[I%]/DET NEXT
+END
+
+' MULTIPLY
+COMMON DEF MULTIPLY2 O[],L[],R[]
+ VAR AL[8],AR[8],AO[8]
+ COPY AL,0,L,0,2
+ COPY AL,2,L,0,2
+ COPY AL,4,L,2,2
+ COPY AL,6,L,2,2
+ AR[0]=R[0,0]
+ AR[1]=R[1,0]
+ AR[2]=R[0,1]
+ AR[3]=R[1,1]
+ COPY AR,4,AR,0,4
+ 'ARYOP #AOPMUL,AO,AL,AR
+ VAR I%:FOR I%=0 TO LEN(AO)-1 AO[I%]=AL[I%]*AR[I%] NEXT
+ O[0,0]=AO[0]+AO[1]
+ O[0,1]=AO[2]+AO[3]
+ O[1,0]=AO[4]+AO[5]
+ O[1,1]=AO[6]+AO[7]
+END
+
+COMMON DEF MULTIPLY3 O[],L[],R[]
+ VAR AL[27],AR[27],AO[27]
+ COPY AL, 0,L,0,3
+ COPY AL, 3,L,0,3
+ COPY AL, 6,L,0,3
+ COPY AL, 9,L,3,3
+ COPY AL,12,L,3,3
+ COPY AL,15,L,3,3
+ COPY AL,18,L,6,3
+ COPY AL,21,L,6,3
+ COPY AL,24,L,6,3
+ AR[0]=R[0,0]
+ AR[1]=R[1,0]
+ AR[2]=R[2,0]
+ AR[3]=R[0,1]
+ AR[4]=R[1,1]
+ AR[5]=R[2,1]
+ AR[6]=R[0,2]
+ AR[7]=R[1,2]
+ AR[8]=R[2,2]
+ COPY AR, 9,AR,0,9
+ COPY AR,18,AR,0,9
+ 'ARYOP #AOPMUL,AO,AL,AR
+ VAR I%:FOR I%=0 TO LEN(AO)-1 AO[i%]=AL[I%]*AR[I%] NEXT
+ O[0,0]=AO[ 0]+AO[ 1]+AO[ 2]
+ O[0,1]=AO[ 3]+AO[ 4]+AO[ 5]
+ O[0,2]=AO[ 6]+AO[ 7]+AO[ 8]
+ O[1,0]=AO[ 9]+AO[10]+AO[11]
+ O[1,1]=AO[12]+AO[13]+AO[14]
+ O[1,2]=AO[15]+AO[16]+AO[17]
+ O[2,0]=AO[18]+AO[19]+AO[20]
+ O[2,1]=AO[21]+AO[22]+AO[23]
+ O[2,2]=AO[24]+AO[25]+AO[26]
+END
+
+COMMON DEF MULTIPLY4 O[],L[],R[]
+ VAR AL[64],AR[64],AO[64]
+ COPY AL, 0,L, 0,4
+ COPY AL, 4,L, 0,4
+ COPY AL, 8,L, 0,4
+ COPY AL,12,L, 0,4
+ COPY AL,16,L, 4,4
+ COPY AL,20,L, 4,4
+ COPY AL,24,L, 4,4
+ COPY AL,28,L, 4,4
+ COPY AL,32,L, 8,4
+ COPY AL,36,L, 8,4
+ COPY AL,40,L, 8,4
+ COPY AL,44,L, 8,4
+ COPY AL,48,L,12,4
+ COPY AL,62,L,12,4
+ COPY AL,56,L,12,4
+ COPY AL,60,L,12,4
+ AR[ 0]=R[0,0]
+ AR[ 1]=R[1,0]
+ AR[ 2]=R[2,0]
+ AR[ 3]=R[3,0]
+ AR[ 4]=R[0,1]
+ AR[ 5]=R[1,1]
+ AR[ 6]=R[2,1]
+ AR[ 7]=R[3,1]
+ AR[ 8]=R[0,2]
+ AR[ 9]=R[1,2]
+ AR[10]=R[2,2]
+ AR[11]=R[3,2]
+ AR[12]=R[0,3]
+ AR[13]=R[1,3]
+ AR[14]=R[2,3]
+ AR[15]=R[3,3]
+ COPY AR,16,AR,0,16
+ COPY AR,32,AR,0,16
+ COPY AR,48,AR,0,16
+ 'ARYOP #AOPMUL,AO,AL,AR
+ VAR I%:FOR I%=0 TO LEN(AO)-1 AO[i%]=AL[I%]*AR[I%] NEXT
+ O[0,0]=AO[ 0]+AO[ 1]+AO[ 2]+AO[ 3]
+ O[0,1]=AO[ 4]+AO[ 5]+AO[ 6]+AO[ 7]
+ O[0,2]=AO[ 8]+AO[ 9]+AO[19]+AO[11]
+ O[0,3]=AO[12]+AO[13]+AO[14]+AO[15]
+ O[1,0]=AO[16]+AO[17]+AO[18]+AO[19]
+ O[1,1]=AO[20]+AO[21]+AO[22]+AO[23]
+ O[1,2]=AO[24]+AO[25]+AO[26]+AO[27]
+ O[1,3]=AO[28]+AO[29]+AO[30]+AO[31]
+ O[2,0]=AO[32]+AO[33]+AO[34]+AO[35]
+ O[2,1]=AO[36]+AO[37]+AO[38]+AO[39]
+ O[2,2]=AO[40]+AO[41]+AO[42]+AO[43]
+ O[2,3]=AO[44]+AO[45]+AO[46]+AO[47]
+ O[3,0]=AO[48]+AO[49]+AO[50]+AO[51]
+ O[3,1]=AO[52]+AO[53]+AO[54]+AO[55]
+ O[3,2]=AO[56]+AO[57]+AO[58]+AO[59]
+ O[3,3]=AO[60]+AO[61]+AO[62]+AO[63]
+END
+
+' TRANSFORM
+COMMON DEF TRANSFORM2 O[],V[],M[]
+ VAR AL[4],AR[4],AO[4]
+ COPY AL,0,L,0,2
+ COPY AL,2,L,0,2
+ AR[0]=R[0,0]
+ AR[1]=R[1,0]
+ AR[2]=R[0,1]
+ AR[3]=R[1,1]
+ 'ARYOP #AOPMUL,AO,AL,AR
+ VAR I%:FOR I%=0 TO LEN(AO)-1 AO[i%]=AL[I%]*AR[I%] NEXT
+ O[0]=AO[0]+AO[1]
+ O[1]=AO[2]+AO[3]
+END
+
+COMMON DEF TRANSFORM3 O[],V[],M[]
+ VAR AL[9],AR[9],AO[9]
+ COPY AL,0,L,0,2
+ COPY AL,2,L,0,2
+ COPY AL,2,L,0,2
+ AR[0]=R[0,0]
+ AR[1]=R[1,0]
+ AR[2]=R[2,0]
+ AR[3]=R[0,1]
+ AR[4]=R[1,1]
+ AR[5]=R[2,1]
+ AR[6]=R[0,2]
+ AR[7]=R[1,2]
+ AR[8]=R[2,2]
+ 'ARYOP #AOPMUL,AO,AL,AR
+ VAR I%:FOR I%=0 TO LEN(AO)-1 AO[i%]=AL[I%]*AR[I%] NEXT
+ O[0]=AO[0]+AO[1]+AO[2]
+ O[1]=AO[3]+AO[4]+AO[5]
+ O[2]=AO[6]+AO[7]+AO[8]
+END
+
+COMMON DEF TRANSFORM4 O[],V[],M[]
+ VAR AL[16],AR[16],AO[16]
+ COPY AL, 0,L,0,4
+ COPY AL, 4,L,0,4
+ COPY AL, 8,L,0,4
+ COPY AL,12,L,0,4
+ AR[ 0]=R[0,0]
+ AR[ 1]=R[1,0]
+ AR[ 2]=R[2,0]
+ AR[ 3]=R[3,0]
+ AR[ 4]=R[0,1]
+ AR[ 5]=R[1,1]
+ AR[ 6]=R[2,1]
+ AR[ 7]=R[3,1]
+ AR[ 8]=R[0,2]
+ AR[ 9]=R[1,2]
+ AR[10]=R[2,2]
+ AR[11]=R[3,2]
+ AR[12]=R[0,3]
+ AR[13]=R[1,3]
+ AR[14]=R[2,3]
+ AR[15]=R[3,3]
+ 'ARYOP #AOPMUL,AO,AL,AR
+ VAR I%:FOR I%=0 TO LEN(AO)-1 AO[i%]=AL[I%]*AR[I%] NEXT
+ O[0]=AO[ 0]+AO[ 1]+AO[ 2]+AO[ 3]
+ O[1]=AO[ 4]+AO[ 5]+AO[ 6]+AO[ 7]
+ O[2]=AO[ 8]+AO[ 9]+AO[10]+AO[11]
+ O[3]=AO[12]+AO[13]+AO[14]+AO[15]
+END
+
+COMMON DEF ROTATE2 O[],R
+ VAR C=COS(R)
+ VAR S=SIN(R)
+ O[0,0]= C:O[0,1]=S
+ O[1,0]=-S:O[1,1]=C
+END
+
+COMMON DEF ROTATE3X O[],R
+ VAR C=COS(R)
+ VAR S=SIN(R)
+ O[0,0]=1:O[0,1]= 0:O[0,2]=0
+ O[1,0]=0:O[1,1]= C:O[1,2]=S
+ O[2,0]=0:O[2,1]=-S:O[2,2]=C
+END
+
+COMMON DEF ROTATE4X O[],R
+ ROTATE3X O,R
+ O[0,3]=0:O[1,3]=0:O[2,3]=0:O[3,0]=0:O[3,1]=0:O[3,2]=0
+ O[3,3]=1
+END
+
+COMMON DEF ROTATE3Y O[],R
+ VAR C=COS(R)
+ VAR S=SIN(R)
+ O[0,0]=C:O[0,1]=0:O[0,2]=-S
+ O[1,0]=0:O[1,1]=1:O[1,2]= 0
+ O[2,0]=S:O[2,1]=0:O[2,2]= C
+END
+
+COMMON DEF ROTATE4Y O[],R
+ ROTATE3Y O,R
+ O[0,3]=0:O[1,3]=0:O[2,3]=0:O[3,0]=0:O[3,1]=0:O[3,2]=0
+ O[3,3]=1
+END
+
+COMMON DEF ROTATE3Z O[],R
+ VAR C=COS(R)
+ VAR S=SIN(R)
+ O[0,0]= C:O[0,1]=S:O[0,2]=0
+ O[1,0]=-S:O[1,1]=C:O[1,2]=0
+ O[2,0]= 0:O[2,1]=0:O[2,2]=1
+END
+
+COMMON DEF ROTATE4Z O[],R
+ ROTATE3Z O,R
+ O[0,3]=0:O[1,3]=0:O[2,3]=0:O[3,0]=0:O[3,1]=0:O[3,2]=0
+ O[3,3]=1
+END
+
+COMMON DEF ROTATE3AXIS O[],AX[],R
+ VAR C=COS(R)
+ VAR S=SIN(R)
+ VAR C1=1-C
+ 'VAR XY=AX[#X]*AX[#Y]
+ 'VAR YZ=AX[#Y]*AX[#Z]
+ 'VAR ZX=AX[#Z]*AX[#X]
+ 'O[0,0]=C+C1*AX[#X]*AX[#X]
+ 'O[0,1]=C1*XY+S*AX[#Z]
+ 'O[0,2]=C1*ZX-S*AX[#Y]
+ 'O[1,0]=C1*XY-S*AX[#Z]
+ 'O[1,1]=C1*AX[#Y]*AX[#Y]+C
+ 'O[1,2]=C1*YZ+S*AX[#X]
+ 'O[2,0]=C1*ZX+S*AX[#Y]
+ 'O[2,1]=C1*YZ-S*AX[#X]
+ 'O[2,2]=C1*AX[#Z]*AX[#Z]+C
+ VAR XY=AX[0]*AX[1]
+ VAR YZ=AX[1]*AX[2]
+ VAR ZX=AX[2]*AX[0]
+ O[0,0]=C+C1*AX[0]*AX[0]
+ O[0,1]=C1*XY+S*AX[2]
+ O[0,2]=C1*ZX-S*AX[1]
+ O[1,0]=C1*XY-S*AX[2]
+ O[1,1]=C1*AX[1]*AX[1]+C
+ O[1,2]=C1*YZ+S*AX[0]
+ O[2,0]=C1*ZX+S*AX[1]
+ O[2,1]=C1*YZ-S*AX[0]
+ O[2,2]=C1*AX[2]*AX[2]+C
+END
+
+COMMON DEF ROTATE4AXIS O[],AX[],R
+ ROTATE3AXIS O,AX,R
+ O[0,3]=0:O[1,3]=0:O[2,3]=0:O[3,0]=0:O[3,1]=0:O[3,2]=0
+ O[3,3]=1
+END
+
+COMMON DEF LOOKAT O[],POS[],TAG[],UP[]
+ VAR F[LEN(POS)]
+ 'ARYOP #AOPSUB,F,TAG,POS
+ VAR I%:FOR I%=0 TO LEN(F)-1 F[i%]=TAG[I%]-POS[I%] NEXT
+ NORMALIZE F,F
+ VAR S[LEN(POS)]
+ CROSS S,FWD,UP
+ NORMALIZE S,S
+ VAR U[LEN(POS)]
+ CROSS U,S,F
+ 'O[0,0]= S[#X]
+ 'O[0,1]= U[#X]
+ 'O[0,2]=-F[#X]
+ O[0,0]= S[0]
+ O[0,1]= U[0]
+ O[0,2]=-F[0]
+ O[0,3]= 0
+ 'O[1,0]= S[#Y]
+ 'O[1,1]= U[#Y]
+ 'O[1,2]=-F[#Y]
+ O[1,0]= S[1]
+ O[1,1]= U[1]
+ O[1,2]=-F[1]
+ O[1,3]= 0
+ 'O[2,0]= S[#Z]
+ 'O[2,1]= U[#Z]
+ 'O[2,2]=-F[#Z]
+ O[2,0]= S[2]
+ O[2,1]= U[2]
+ O[2,2]=-F[2]
+ O[2,3]= 0
+ O[3,0]=-DOT(S,POS)
+ O[3,1]=-DOT(U,POS)
+ O[3,2]= DOT(F,POS)
+ O[3,3]= 1
+END
+
+COMMON DEF PERSPECTIVE O[],FOV,ASP,N,F
+ VAR COT=1/TAN(FOV/2)
+ VAR R=F/(N-F)
+ O[0,0]= COT/ASP
+ O[0,1]= 0
+ O[0,2]= 0
+ O[0,3]= 0
+ O[1,0]= 0
+ O[1,1]= COT
+ O[1,2]= 0
+ O[1,3]= 0
+ O[2,0]= 0
+ O[2,1]= 0
+ O[2,2]= R
+ O[2,3]=-1
+ O[3,0]= 0
+ O[3,1]= 0
+ O[3,2]= N*R
+ O[3,3]= 0
+END
+
+COMMON DEF VIEWPORT O[],X,Y,W,H,N,F
+ VAR W2=W/2
+ VAR H2=H/2
+ VAR NF=F-N
+ ' GL
+ O[1,1]=H2
+ O[2,2]=FN/2
+ O[3,2]=(N+F)/2
+ ' DX
+ 'O[1,1]=-H2
+ 'O[2,2]= FN
+ 'O[3,2]= N
+
+ O[0,0]=W2
+ O[3,0]=X+W2
+ O[3,1]=Y+H2
+ O[0,1]=0
+ O[0,2]=0
+ O[0,3]=0
+ O[1,0]=0
+ O[1,2]=0
+ O[1,3]=0
+ O[2,0]=0
+ O[2,1]=0
+ O[2,3]=0
+ O[3,3]=1
+END
+
+
