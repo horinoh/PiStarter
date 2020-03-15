@@ -6,13 +6,68 @@ LOAD "PRG1:MATH.PRG":EXEC 1
 'LOAD "RENDER.PRG",2:EXEC 2
 LOAD "PRG2:RENDER.PRG":EXEC 2
 
+DEF VERIFY_VEC3
+ VAR A[3]'=[1,2,3]
+ VAR B[3]'=[4,5,6]
+ A[0]=1:A[1]=2:A[2]=3
+ B[0]=4:B[1]=5:B[2]=6
+ ?"A = ";
+ '??A
+ ?A[0],A[1],A[2]
+ ?"B = ";
+ '??B
+ ?B[0],B[1],B[2]
+
+ ?"DOT(A,B) = ";
+ ?DOT(A,B)
+
+ ?"CROSS(A,B) = ";
+ VAR C3[3]
+ CROSS C3,A,B
+ '??C3
+ ?C3[0],C3[1],C3[2]
+END
+
+DEF VERIFY_MAT2
+ VAR A[2,2]'=[1,-1,-2,3]
+ VAR B[2,2]'=[1,2,3,4]
+ A[0,0]=1:A[0,1]=-1:A[1,0]=-2:A[1,1]=3
+ B[0,0]=1:B[0,1]=2:B[1,0]=3:B[1,1]=4
+ ?"A = ";
+ '??A
+ ?A[0,0],A[0,1],A[1,0],A[1,1]
+ ?"B = ";
+ '??B
+ ?B[0,0],B[0,1],B[1,0],B[1,1]
+
+ VAR C[2,2]
+ ?"DETERMINANT2(A) = ";
+ VAR DET=DETERMINANT2(A)
+ ?DET
+
+ ?"INVERSE2(A) = ";
+ INVERSE2 C,A,DET
+ ?C[0,0],C[0,1],C[1,0],C[1,1]
+
+ ?"A*B = ";
+ MULTIPLY2 C,A,B
+ ?C[0,0],C[0,1],C[1,0],C[1,1]
+ ?"B*A = ";
+ MULTIPLY2 C,B,A
+ ?C[0,0],C[0,1],C[1,0],C[1,1]
+END
+
 DEF MAIN
  ACLS
 
  'DEFAULT == 640X360
  'XSCREEN 1280,720
 
- GRP_DRAW_TRIANGLES GRP_POLY_PAGE(),GRP_POLY_WIDTH(),GRP_POLY_HEIGHT(),GRP_POLY_MARGIN(),RGB(255,255,255)
+ VERIFY_VEC3
+ ?""
+ VERIFY_MAT2
+
+ GRP_DRAW_TRIANGLES GRP_POLY_PAGE(),GRP_POLY_WIDTH(),GRP_POLY_HEIGHT(),GRP_POLY_MARGIN(),RGB(127,127,127)
  GPAGE GRP_POLY_PAGE(),0
 
  WHILE #FALSE
