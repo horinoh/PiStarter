@@ -7,22 +7,28 @@
 ## Pi Zero W 初期設定
 - アクティベーションをCtrl-cでキャンセル、Linuxのコンソール画面へ行く
 - 無線LAN設定
-    - $sudo raspi-config - Network Options - WiFi - Japan - SSIDとパスフレーズの入力
-    - $sudo shutdown -r now
-    - この時点でネットにつながるのでPiStarterをアクティベーションしておく
-    - ESCでPiStarterのコマンドラインモードへ、quitでLinuxコンソールへ行ける
+    ~~~
+    $sudo raspi-config - Network Options - WiFi - Japan - SSIDとパスフレーズの入力
+    $sudo shutdown -r now
+    この時点でネットにつながるのでPiStarterをアクティベーションしておく
+    ESCでPiStarterのコマンドラインモードへ、quitでLinuxコンソールへ行ける
+    ~~~
 
 - SSH有効化
-    - $sudo raspi-config - Interfacing Options - SSH - Yes
+    ~~~
+    $sudo raspi-config - Interfacing Options - SSH - Yes
+    ~~~
 
 - Samba
-    - $sudo apt-get update
-        - アップデートを先にしないとSambaのインストールでこけた
-    - $sudo apt-get install samba
-    - $sudo apt-get upgrade
-        - 一応アップグレードもしておく
+    ~~~
+    $sudo apt-get update //アップデートを先にしないとSambaのインストールでこけた
+    $sudo apt-get install samba
+    $sudo apt-get upgrade //一応アップグレードもしておく
+    ~~~
     - この時点でホスト名(raspberrypi.local)でpingが通るようになる
-        - ping raspberrypi.local
+        ~~~
+        ping raspberrypi.local
+        ~~~
     - [RLogin](http://nanno.dip.jp/softlib/man/rlogin/)等でホスト名でログインできるようになる        
     - Windowsのエクスプローラーから\\\raspberrypiでアクセスできるようになっている
         - ただ見えるだけ、後はSambaの設定しだい
@@ -39,16 +45,22 @@
             ;force directory mode = 0755
             ~~~
 - VNC
-    - $sudo raspi-config - Interfacing Options - VNC - Yes
+    ~~~
+    $sudo raspi-config - Interfacing Options - VNC - Yes
+    ~~~
     - Xのインストール
-        - $sudo apt-get install --no-install-recommends xserver-xorg
-        - $sudo apt-get install --no-install-recommends xinit
-        - $sudo apt-get install raspberrypi-ui-mods
+        ~~~
+        $sudo apt-get install --no-install-recommends xserver-xorg
+        $sudo apt-get install --no-install-recommends xinit
+        $sudo apt-get install raspberrypi-ui-mods
+        ~~~
     - $startx
         - 右上のV2を右クリック - Options - TroubleShooting - Enable direct capture mode にチェック
         - 左上のラズベリーパイのアイコン - Shutdown - Exit to command line でコンソールに戻る
     - 起動時にXが立ち上がるようになっているので、元の挙動に戻しておく
-        - $sudo raspi-config - Boot Options - Desktop/CLI - Console Autologin... 
+        ~~~
+        $sudo raspi-config - Boot Options - Desktop/CLI - Console Autologin... 
+        ~~~
     - [VNCViewer](https://www.realvnc.com/en/connect/download/viewer/)等でログインする
         - PiStarter内だと直接つないだキーボードでないと操作できない…
             - Linuxコンソールに戻るとVNCから操作できる
@@ -58,5 +70,7 @@
 ## 他
 - ESCでPiStarterのコマンドラインモードへ、quitでLinuxコンソールへ行ける
 - PiStarterのコマンドラインでは!をつけるとLinuxコマンドが使える
-    - !ls -l
+    ~~~
+    $!ls -l
+    ~~~
 - PiStarterが立ち上がっているときのカレントディレクトリは/boot/SMILEBOOM/SMILEBASIC-R/workspace
