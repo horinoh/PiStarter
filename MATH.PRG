@@ -306,12 +306,12 @@ END
 ' TRANSFORM
 COMMON DEF TRANSFORM2 O[],V[],M[]
  VAR AL[4],AR[4],AO[4]
- COPY AL,0,L,0,2
- COPY AL,2,L,0,2
- AR[0]=R[0,0]
- AR[1]=R[1,0]
- AR[2]=R[0,1]
- AR[3]=R[1,1]
+ COPY AL,0,V,0,2
+ COPY AL,2,V,0,2
+ AR[0]=M[0,0]
+ AR[1]=M[1,0]
+ AR[2]=M[0,1]
+ AR[3]=M[1,1]
  'ARYOP #AOPMUL,AO,AL,AR
  VAR I%:FOR I%=0 TO LEN(AO)-1 AO[I%]=AL[I%]*AR[I%] NEXT
  O[0]=AO[0]+AO[1]
@@ -320,18 +320,18 @@ END
 
 COMMON DEF TRANSFORM3 O[],V[],M[]
  VAR AL[9],AR[9],AO[9]
- COPY AL,0,L,0,2
- COPY AL,2,L,0,2
- COPY AL,2,L,0,2
- AR[0]=R[0,0]
- AR[1]=R[1,0]
- AR[2]=R[2,0]
- AR[3]=R[0,1]
- AR[4]=R[1,1]
- AR[5]=R[2,1]
- AR[6]=R[0,2]
- AR[7]=R[1,2]
- AR[8]=R[2,2]
+ COPY AL,0,V,0,3
+ COPY AL,3,V,0,3
+ COPY AL,6,V,0,3
+ AR[0]=M[0,0]
+ AR[1]=M[1,0]
+ AR[2]=M[2,0]
+ AR[3]=M[0,1]
+ AR[4]=M[1,1]
+ AR[5]=M[2,1]
+ AR[6]=M[0,2]
+ AR[7]=M[1,2]
+ AR[8]=M[2,2]
  'ARYOP #AOPMUL,AO,AL,AR
  VAR I%:FOR I%=0 TO LEN(AO)-1 AO[I%]=AL[I%]*AR[I%] NEXT
  O[0]=AO[0]+AO[1]+AO[2]
@@ -341,26 +341,26 @@ END
 
 COMMON DEF TRANSFORM4 O[],V[],M[]
  VAR AL[16],AR[16],AO[16]
- COPY AL, 0,L,0,4
- COPY AL, 4,L,0,4
- COPY AL, 8,L,0,4
- COPY AL,12,L,0,4
- AR[ 0]=R[0,0]
- AR[ 1]=R[1,0]
- AR[ 2]=R[2,0]
- AR[ 3]=R[3,0]
- AR[ 4]=R[0,1]
- AR[ 5]=R[1,1]
- AR[ 6]=R[2,1]
- AR[ 7]=R[3,1]
- AR[ 8]=R[0,2]
- AR[ 9]=R[1,2]
- AR[10]=R[2,2]
- AR[11]=R[3,2]
- AR[12]=R[0,3]
- AR[13]=R[1,3]
- AR[14]=R[2,3]
- AR[15]=R[3,3]
+ COPY AL, 0,V,0,4
+ COPY AL, 4,V,0,4
+ COPY AL, 8,V,0,4
+ COPY AL,12,V,0,4
+ AR[ 0]=M[0,0]
+ AR[ 1]=M[1,0]
+ AR[ 2]=M[2,0]
+ AR[ 3]=M[3,0]
+ AR[ 4]=M[0,1]
+ AR[ 5]=M[1,1]
+ AR[ 6]=M[2,1]
+ AR[ 7]=M[3,1]
+ AR[ 8]=M[0,2]
+ AR[ 9]=M[1,2]
+ AR[10]=M[2,2]
+ AR[11]=M[3,2]
+ AR[12]=M[0,3]
+ AR[13]=M[1,3]
+ AR[14]=M[2,3]
+ AR[15]=M[3,3]
  'ARYOP #AOPMUL,AO,AL,AR
  VAR I%:FOR I%=0 TO LEN(AO)-1 AO[I%]=AL[I%]*AR[I%] NEXT
  O[0]=AO[ 0]+AO[ 1]+AO[ 2]+AO[ 3]
@@ -434,18 +434,18 @@ COMMON DEF ROTATE3AXIS O[],AX[],R
  'O[2,0]=C1*ZX+S*AX[#Y]
  'O[2,1]=C1*YZ-S*AX[#X]
  'O[2,2]=C1*AX[#Z]*AX[#Z]+C
- VAR XY=AX[0]*AX[1]
- VAR YZ=AX[1]*AX[2]
- VAR ZX=AX[2]*AX[0]
- O[0,0]=C+C1*AX[0]*AX[0]
- O[0,1]=C1*XY+S*AX[2]
- O[0,2]=C1*ZX-S*AX[1]
- O[1,0]=C1*XY-S*AX[2]
- O[1,1]=C1*AX[1]*AX[1]+C
- O[1,2]=C1*YZ+S*AX[0]
- O[2,0]=C1*ZX+S*AX[1]
- O[2,1]=C1*YZ-S*AX[0]
- O[2,2]=C1*AX[2]*AX[2]+C
+ VAR XY=AX[_X]*AX[_Y]
+ VAR YZ=AX[_Y]*AX[_Z]
+ VAR ZX=AX[_Z]*AX[_X]
+ O[0,0]=C+C1*AX[_X]*AX[_X]
+ O[0,1]=C1*XY+S*AX[_Z]
+ O[0,2]=C1*ZX-S*AX[_Y]
+ O[1,0]=C1*XY-S*AX[_Z]
+ O[1,1]=C1*AX[_Y]*AX[_Y]+C
+ O[1,2]=C1*YZ+S*AX[_X]
+ O[2,0]=C1*ZX+S*AX[_Y]
+ O[2,1]=C1*YZ-S*AX[_X]
+ O[2,2]=C1*AX[_Z]*AX[_Z]+C
 END
 
 COMMON DEF ROTATE4AXIS O[],AX[],R
@@ -467,23 +467,23 @@ COMMON DEF LOOKAT O[],POS[],TAG[],UP[]
  'O[0,0]= S[#X]
  'O[0,1]= U[#X]
  'O[0,2]=-F[#X]
- O[0,0]= S[0]
- O[0,1]= U[0]
- O[0,2]=-F[0]
+ O[0,0]= S[_X]
+ O[0,1]= U[_X]
+ O[0,2]=-F[_X]
  O[0,3]= 0
  'O[1,0]= S[#Y]
  'O[1,1]= U[#Y]
  'O[1,2]=-F[#Y]
- O[1,0]= S[1]
- O[1,1]= U[1]
- O[1,2]=-F[1]
+ O[1,0]= S[_Y]
+ O[1,1]= U[_Y]
+ O[1,2]=-F[_Y]
  O[1,3]= 0
  'O[2,0]= S[#Z]
  'O[2,1]= U[#Z]
  'O[2,2]=-F[#Z]
- O[2,0]= S[2]
- O[2,1]= U[2]
- O[2,2]=-F[2]
+ O[2,0]= S[_Z]
+ O[2,1]= U[_Z]
+ O[2,2]=-F[_Z]
  O[2,3]= 0
  O[3,0]=-DOT(S,POS)
  O[3,1]=-DOT(U,POS)
@@ -540,4 +540,4 @@ COMMON DEF VIEWPORT O[],X,Y,W,H,N,F
  O[3,3]=1
 END
 
-
+'TODO QUAT

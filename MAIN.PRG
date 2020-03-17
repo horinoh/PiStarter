@@ -58,6 +58,26 @@ DEF VERIFY_MAT2
  MULTIPLY2 C,B,A
  '??C
  ?C[0,0],C[0,1],C[1,0],C[1,1]
+
+ VAR D[2,2]'=[1,2,3,4]
+ D[0,0]=1:D[0,1]=2:D[1,0]=3:D[1,1]=4
+ ?"D = ";
+ '??D
+ ?D[0,0],D[0,1],D[1,0],D[1,1]
+ VAR E[2]'=[1,3]
+ E[0]=1:E[1]=3
+ ?"E = ";
+ '??E
+ ?E[0],E[1]
+ VAR F[2]
+ TRANSFORM2 F,E,D
+ ?"E*D = ";
+ '??F
+ ?F[0],F[1]
+
+ 'TODO
+ 'G[2,2]
+ 'ROTATE2 G,RAD(30)
 END
 
 DEF VERIFY_MAT3
@@ -101,6 +121,31 @@ DEF VERIFY_MAT3
  MULTIPLY3 C,B,A
  '??C
  ?C[0,0],C[0,1],C[0,2],C[1,0],C[1,1],C[1,2],C[2,0],C[2,1],C[2,2]
+
+ D[0,0]=2:D[0,1]=4:D[0,2]=6
+ D[1,0]=3:D[1,1]=1:D[1,2]=5
+ D[2,0]=8:D[2,1]=7:D[2,2]=9
+ ?"D = ";
+ '??D
+ ?D[0,0],D[0,1],D[0,2],D[1,0],D[1,1],D[1,2],D[2,0],D[2,1],D[2,2]
+ VAR E[3]'=[3,4,1]
+ E[0]=3:E[1]=4:E[2]=1
+ ?"E = ";
+ '??E
+ ?E[0],E[1],E[2]
+ VAR F[3]
+ TRANSFORM3 F,E,D
+ ?"E*D = ";
+ '??F
+ ?F[0],F[1],F[2]
+
+ 'TODO
+ 'G[3,3]
+ 'ROTATE3X G,RAD(30)
+ 'ROTATE3Y G,RAD(30)
+ 'ROTATE3Z G,RAD(30)
+ 'VAR AX[3]
+ 'ROTATE3AXIS G,AX,RAD(30)
 END
 
 DEF VERIFY_MAT4
@@ -149,8 +194,44 @@ DEF VERIFY_MAT4
  MULTIPLY4 D,C,B
  '??D
  ?D[0,0],D[0,1],D[0,2],D[0,3],D[1,0],D[1,1],D[1,2],D[1,3],D[2,0],D[2,1],D[2,2],D[2,3],D[3,0],D[3,1],D[3,2],D[3,3]
-END
 
+ D[0,0]=2:D[0,1]=3:D[0,2]=-4:D[0,3]=2
+ D[1,0]=4:D[1,1]=1:D[1,2]=4:D[1,3]=5
+ D[2,0]=2:D[2,1]=5:D[2,2]=3:D[2,3]=1
+ D[3,0]=1:D[3,1]=6:D[3,2]=2:D[3,3]=3
+ ?"D = ";
+ '??D
+ ?D[0,0],D[0,1],D[0,2],D[0,3],D[1,0],D[1,1],D[1,2],D[1,3],D[2,0],D[2,1],D[2,2],D[2,3],D[3,0],D[3,1],D[3,2],D[3,3]
+ VAR E[4]'=[3,2,5,1]
+ E[0]=3:E[1]=2:E[2]=5:E[3]=1
+ ?"E = ";
+ '??E
+ ?E[0],E[1],E[2],E[3]
+ VAR F[4]
+ TRANSFORM4 F,E,D
+ ?"E*D = ";
+ '??F
+ ?F[0],F[1],F[2],F[3]
+
+ 'TODO
+ 'G[4,4]
+ 'ROTATE4X G,RAD(30)
+ 'ROTATE4Y G,RAD(30)
+ 'ROTATE4Z G,RAD(30)
+ 'VAR AX[3]
+ 'ROTATE4AXIS G,AX,RAD(30)
+
+ 'VAR P[3],T[3],U[3]
+ 'VAR VW[4,4]
+ 'LOOKAT VW,P,T,U
+ 
+ 'VAR PRJ[4,4]
+ 'VAR FOV,ASP,N,F
+ 'PERSPECTIVE PRJ,FOV,ASP,N,F
+
+ 'VAR VP[4,4]
+ 'VIEWPORT VP,X,Y,W,H,N,F
+END
 
 DEF MAIN
  ACLS
