@@ -75,9 +75,11 @@ DEF VERIFY_MAT2
  '??F
  ?F[0],F[1]
 
- 'TODO
- 'G[2,2]
- 'ROTATE2 G,RAD(30)
+ VAR G[2,2]
+ ?"ROTX(60) = ";
+ ROTATE2 G,RAD(60)
+ '??G
+ ?G[0,0],G[0,1],G[1,0],G[1,1]
 END
 
 DEF VERIFY_MAT3
@@ -139,13 +141,29 @@ DEF VERIFY_MAT3
  '??F
  ?F[0],F[1],F[2]
 
- 'TODO
- 'G[3,3]
- 'ROTATE3X G,RAD(30)
- 'ROTATE3Y G,RAD(30)
- 'ROTATE3Z G,RAD(30)
- 'VAR AX[3]
- 'ROTATE3AXIS G,AX,RAD(30)
+ VAR G[3,3]
+ ?"ROTX(60) = ";
+ ROTATEX3 G,RAD(60)
+ '??G
+ ?G[0,0],G[0,1],G[0,2],G[1,0],G[1,1],G[1,2],G[2,0],G[2,1],G[2,2]
+
+ ?"ROTY(60) = ";
+ ROTATEY3 G,RAD(60)
+ '??G
+ ?G[0,0],G[0,1],G[0,2],G[1,0],G[1,1],G[1,2],G[2,0],G[2,1],G[2,2]
+ 
+ ?"ROTZ(60) = ";
+ ROTATEZ3 G,RAD(30)
+ '??G
+ ?G[0,0],G[0,1],G[0,2],G[1,0],G[1,1],G[1,2],G[2,0],G[2,1],G[2,2]
+
+ VAR AX[3]'=[1,1,0]
+ AX[0]=1:AX[1]=1:AX[2]=0
+ ?"ROTAXIS{1,1,0}(60) = ";
+ NORMALIZE AX,AX
+ ROTATEAXIS3 G,RAD(60),AX
+ '??G
+ ?G[0,0],G[0,1],G[0,2],G[1,0],G[1,1],G[1,2],G[2,0],G[2,1],G[2,2]
 END
 
 DEF VERIFY_MAT4
@@ -213,24 +231,123 @@ DEF VERIFY_MAT4
  '??F
  ?F[0],F[1],F[2],F[3]
 
- 'TODO
- 'G[4,4]
- 'ROTATE4X G,RAD(30)
- 'ROTATE4Y G,RAD(30)
- 'ROTATE4Z G,RAD(30)
- 'VAR AX[3]
- 'ROTATE4AXIS G,AX,RAD(30)
+ VAR G[4,4]
+ ?"ROTX(60) = ";
+ ROTATEX4 G,RAD(60)
+ '??G
+ ?G[0,0],G[0,1],G[0,2],G[0,3],G[1,0],G[1,1],G[1,2],G[1,3],G[2,0],G[2,1],G[2,2],G[2,3],G[3,0],G[3,1],G[3,2],G[3,3]
 
- 'VAR P[3],T[3],U[3]
- 'VAR VW[4,4]
- 'LOOKAT VW,P,T,U
+ ?"ROTY(60) = ";
+ ROTATEY4 G,RAD(60)
+ '??G
+ ?G[0,0],G[0,1],G[0,2],G[0,3],G[1,0],G[1,1],G[1,2],G[1,3],G[2,0],G[2,1],G[2,2],G[2,3],G[3,0],G[3,1],G[3,2],G[3,3]
  
- 'VAR PRJ[4,4]
- 'VAR FOV,ASP,N,F
- 'PERSPECTIVE PRJ,FOV,ASP,N,F
+ ?"ROTZ(60) = ";
+ ROTATEZ4 G,RAD(30)
+ '??G
+ ?G[0,0],G[0,1],G[0,2],G[0,3],G[1,0],G[1,1],G[1,2],G[1,3],G[2,0],G[2,1],G[2,2],G[2,3],G[3,0],G[3,1],G[3,2],G[3,3]
 
- 'VAR VP[4,4]
- 'VIEWPORT VP,X,Y,W,H,N,F
+ VAR AX[3]'=[1,1,0]
+ AX[0]=1:AX[1]=1:AX[2]=0
+ ?"ROTAXIS{1,1,0}(60) = ";
+ NORMALIZE AX,AX
+ ROTATEAXIS4 G,RAD(60),AX
+ '??G
+ ?G[0,0],G[0,1],G[0,2],G[0,3],G[1,0],G[1,1],G[1,2],G[1,3],G[2,0],G[2,1],G[2,2],G[2,3],G[3,0],G[3,1],G[3,2],G[3,3]
+
+ VAR PRJ[4,4]
+ VAR FOV=0.16*PI()
+ VAR ASP=16/9
+ VAR NEAR=0.001
+ VAR FAR=100
+ PERSPECTIVE PRJ,FOV,ASP,NEAR,FAR
+ ?"PERSPECTIVE(",FOV,ASP,NEAR,FAR,")="
+ '??PRJ
+ ?PRJ[0,0],PRJ[0,1],PRJ[0,2],PRJ[0,3],PRJ[1,0],PRJ[1,1],PRJ[1,2],PRJ[1,3],PRJ[2,0],PRJ[2,1],PRJ[2,2],PRJ[2,3],PRJ[3,0],PRJ[3,1],PRJ[3,2],PRJ[3,3]
+
+ VAR POS[3]'=[0,0,5]
+ POS[0]=0:POS[1]=0:POS[2]=5
+ VAR TAG[3]'=[0,0,0]
+ TAG[0]=0:TAG[1]=0:TAG[2]=0
+ VAR UP[3]'=[0,1,0]
+ UP[0]=0:UP[1]=1:UP[2]=0
+ VAR VW[4,4]
+ LOOKAT VW,POS,TAG,UP
+ ?"LOOKAT
+ ?" ",POS[0],POS[1],POS[2]
+ ?" ",TAG[0],TAG[1],TAG[2]
+ ?" ",UP[0],UP[1],UP[2]
+ '??VW
+ ?VW[0,0],VW[0,1],VW[0,2],VW[0,3],VW[1,0],VW[1,1],VW[1,2],VW[1,3],VW[2,0],VW[2,1],VW[2,2],VW[2,3],VW[3,0],VW[3,1],VW[3,2],VW[3,3]
+
+ VAR VP[4,4]
+ VAR LT[2]'=[0,0]
+ LT[0]=0:LT[1]=0
+ VAR WH[2]'=[800,600]
+ WH[0]=800:WH[1]=600
+ VIEWPORT VP,LT[0],LT[1],WH[0],WH[1],NEAR,FAR
+ ?"VIEWPORT(",LT[0],LT[1],WH[0],WH[1],NEAR,FAR,")"
+ '??VP
+ ?VP[0,0],VP[0,1],VP[0,2],VP[0,3],VP[1,0],VP[1,1],VP[1,2],VP[1,3],VP[2,0],VP[2,1],VP[2,2],VP[2,3],VP[3,0],VP[3,1],VP[3,2],VP[3,3]
+END
+
+DEF VERIFY_QUAT
+ VAR PITCH=RAD(30)
+ VAR YAW=RAD(45)
+ VAR ROLL=RAD(0)
+ VAR A[4]
+ FROMPITCHYAWROLL A,PITCH,YAW,ROLL
+ ?"PTICHYAWROLL(",PITCH,YAW,ROLL,")=";
+ '??A
+ ?A[0],A[1],A[2],A[3]
+
+ VAR B[4]
+ CONJUGATE B,A
+ ?"CONJUGATE=";
+ '??B
+ ?B[0],B[1],B[2],B[3]
+
+ VAR C[4]
+ INVERSEQ C,A
+ ?"INVERSE=";
+ '??C
+ ?C[0],C[1],C[2],C[3]
+
+ VAR D[4]
+ MULTIPLYQ D,C,A
+ '??D
+ '?D[0],D[1],D[2],D[3]
+
+ VAR E[4]
+ VAR AX[3]'=[0,1,0]
+ AX[0]=0:AX[1]=1:AX[2]=0
+ ROTATEAXISQ E,RAD(45),AX
+ ?"ROTATEAXIS(45,{0,1,0})=";
+ '??E
+ ?E[0],E[1],E[2],E[3]
+
+ VAR U[3]'=[1,0,0]
+ U[0]=1:U[1]=0:U[2]=0
+ VAR V[3]
+ TRANSFORMQ V,U,E
+ ?"TRANSFORM({1,0,0},ROTATEAXIS(45,{0,1,0}))=";
+ '??V
+ ?V[0],V[1],V[2]
+
+ VAR AA[4]
+ TOAXISANGLE AA,E
+ ?"AXIS=";
+ ?AA[0],AA[1],AA[2]
+ ?"ANG=";
+ ?DEG(AA[3])
+
+ VAR F[4]
+ U[0]=1:U[1]=0:U[2]=0
+ V[0]=0:V[1]=1:V[2]=0
+ FROM2VEC F,U,V
+ ?"FROM2VEC({1,0,0},{0,1,0})=";
+ '??F
+ ?F[0],F[1],F[2],F[3]
 END
 
 DEF MAIN
@@ -240,15 +357,22 @@ DEF MAIN
  'XSCREEN 1280,720
 
  VERIFY_VEC3
- ?""
- VERIFY_MAT2
- ?""
- VERIFY_MAT3
+ 
+ '?""
+ 'VERIFY_MAT2
+ 
+ '?""
+ 'VERIFY_MAT3
+ 
  ?""
  VERIFY_MAT4
+ 
+ ?""
+ VERIFY_QUAT
 
  GRP_DRAW_TRIANGLES GRP_POLY_PAGE(),GRP_POLY_WIDTH(),GRP_POLY_HEIGHT(),GRP_POLY_MARGIN(),RGB(127,127,127)
  GPAGE GRP_POLY_PAGE(),0
+ 'SAVE "GRP3:TRI.PNG"
 
  WHILE #FALSE
   'VAR MS=MILLISEC()

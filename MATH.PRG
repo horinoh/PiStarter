@@ -36,11 +36,11 @@ COMMON DEF DOT(L[],R[])
 END
 
 COMMON DEF NORMALIZE O[],V[]
- VAR SQ=DOT(V,V)
- 'IF SQ>#EPSILON THEN
- IF SQ>0.0001 THEN
-  'ARYOP #AOPDIV,O,V,SQR(SQ)
-  VAR I%:FOR I%=0 TO LEN(O)-1 O[I%]=V[I%]*SQR(SQ) NEXT
+ VAR L=DOT(V,V)
+ 'IF L>#EPSILON THEN
+ IF L>_EPSILON THEN
+  'ARYOP #AOPDIV,O,V,SQR(L)
+  L=SQR(L):VAR I%:FOR I%=0 TO LEN(O)-1 O[I%]=V[I%]/L NEXT
  ENDIF
 END
 
@@ -191,6 +191,12 @@ COMMON DEF INVERSE4 O[],M[],DET
  O[3,0]=O[3,0]/DET:O[3,1]=O[3,1]/DET:O[3,2]=O[3,2]/DET:O[3,3]=O[3,3]/DET
 END
 
+COMMON DEF INVERSEQ O[],Q[]
+ CONJUGATE O,Q
+ 'ARYOP #AOPDIV O,O,DOT(Q,Q)
+ VAR L=DOT(Q,Q):VAR I%:FOR I%=0 TO LEN(O)-1 O[I%]=O[I%]/L NEXT
+END
+
 ' MULTIPLY
 COMMON DEF MULTIPLY2 O[],L[],R[]
  VAR AL[8],AR[8],AO[8]
@@ -303,6 +309,17 @@ COMMON DEF MULTIPLY4 O[],L[],R[]
  O[3,3]=AO[60]+AO[61]+AO[62]+AO[63]
 END
 
+COMMON DEF MULTIPLYQ O[],L[],R[]
+ 'O[#X]=R[#W]*L[#X]+R[#X]*L[#W]+R[#Y]*L[#Z]-R[#Z]*L[#Y]
+ 'O[#Y]=R[#W]*L[#Y]-R[#X]*L[#Z]+R[#Y]*L[#W]+R[#Z]*L[#X]
+ 'O[#Z]=R[#W]*L[#Z]+R[#X]*L[#Y]-R[#Y]*L[#X]+R[#Z]*L[#W]
+ 'O[#W]=R[#W]*L[#W]-R[#X]*L[#X]-R[#Y]*L[#Y]-R[#Z]*L[#Z]
+ O[_X]=R[_W]*L[_X]+R[_X]*L[_W]+R[_Y]*L[_Z]-R[_Z]*L[_Y]
+ O[_Y]=R[_W]*L[_Y]-R[_X]*L[_Z]+R[_Y]*L[_W]+R[_Z]*L[_X]
+ O[_Z]=R[_W]*L[_Z]+R[_X]*L[_Y]-R[_Y]*L[_X]+R[_Z]*L[_W]
+ O[_W]=R[_W]*L[_W]-R[_X]*L[_X]-R[_Y]*L[_Y]-R[_Z]*L[_Z]
+END
+
 ' TRANSFORM
 COMMON DEF TRANSFORM2 O[],V[],M[]
  VAR AL[4],AR[4],AO[4]
@@ -369,6 +386,20 @@ COMMON DEF TRANSFORM4 O[],V[],M[]
  O[3]=AO[12]+AO[13]+AO[14]+AO[15]
 END
 
+COMMON DEF TRANSFORMQ O[],V[],Q[]
+ VAR C[LEN(Q)]
+ CONJUGATE C,Q
+ VAR VQ[LEN(Q)]
+ COPY VQ,0,V,0,LEN(V)
+ 'VQ[#W]=0
+ VQ[_W]=0
+ VAR TMP[LEN(Q)]
+ MULTIPLYQ TMP,C,VQ
+ MULTIPLYQ VQ,TMP,Q
+ COPY O,0,VQ,0,LEN(O)
+END
+
+' ROTATE
 COMMON DEF ROTATE2 O[],R
  VAR C=COS(R)
  VAR S=SIN(R)
@@ -376,7 +407,7 @@ COMMON DEF ROTATE2 O[],R
  O[1,0]=-S:O[1,1]=C
 END
 
-COMMON DEF ROTATE3X O[],R
+COMMON DEF ROTATEX3 O[],R
  VAR C=COS(R)
  VAR S=SIN(R)
  O[0,0]=1:O[0,1]= 0:O[0,2]=0
@@ -384,13 +415,13 @@ COMMON DEF ROTATE3X O[],R
  O[2,0]=0:O[2,1]=-S:O[2,2]=C
 END
 
-COMMON DEF ROTATE4X O[],R
- ROTATE3X O,R
+COMMON DEF ROTATEX4 O[],R
+ ROTATEX3 O,R
  O[0,3]=0:O[1,3]=0:O[2,3]=0:O[3,0]=0:O[3,1]=0:O[3,2]=0
  O[3,3]=1
 END
 
-COMMON DEF ROTATE3Y O[],R
+COMMON DEF ROTATEY3 O[],R
  VAR C=COS(R)
  VAR S=SIN(R)
  O[0,0]=C:O[0,1]=0:O[0,2]=-S
@@ -398,27 +429,28 @@ COMMON DEF ROTATE3Y O[],R
  O[2,0]=S:O[2,1]=0:O[2,2]= C
 END
 
-COMMON DEF ROTATE4Y O[],R
- ROTATE3Y O,R
+COMMON DEF ROTATEY4 O[],R
+ ROTATEY3 O,R
  O[0,3]=0:O[1,3]=0:O[2,3]=0:O[3,0]=0:O[3,1]=0:O[3,2]=0
  O[3,3]=1
 END
 
-COMMON DEF ROTATE3Z O[],R
+COMMON DEF ROTATEZ3 O[],R
  VAR C=COS(R)
  VAR S=SIN(R)
- O[0,0]= C:O[0,1]=S:O[0,2]=0
- O[1,0]=-S:O[1,1]=C:O[1,2]=0
+ O[0,0]= S:O[0,1]=C:O[0,2]=0
+ O[1,0]=-C:O[1,1]=S:O[1,2]=0
  O[2,0]= 0:O[2,1]=0:O[2,2]=1
 END
 
-COMMON DEF ROTATE4Z O[],R
- ROTATE3Z O,R
+COMMON DEF ROTATEZ4 O[],R
+ ROTATEZ3 O,R
  O[0,3]=0:O[1,3]=0:O[2,3]=0:O[3,0]=0:O[3,1]=0:O[3,2]=0
  O[3,3]=1
 END
 
-COMMON DEF ROTATE3AXIS O[],AX[],R
+' ROTATEAXIS ... AX[] MUST BE NORMALIZED
+COMMON DEF ROTATEAXIS3 O[],R,AX[]
  VAR C=COS(R)
  VAR S=SIN(R)
  VAR C1=1-C
@@ -448,10 +480,39 @@ COMMON DEF ROTATE3AXIS O[],AX[],R
  O[2,2]=C1*AX[_Z]*AX[_Z]+C
 END
 
-COMMON DEF ROTATE4AXIS O[],AX[],R
- ROTATE3AXIS O,AX,R
+COMMON DEF ROTATEAXIS4 O[],R,AX[]
+ ROTATEAXIS3 O,R,AX
  O[0,3]=0:O[1,3]=0:O[2,3]=0:O[3,0]=0:O[3,1]=0:O[3,2]=0
  O[3,3]=1
+END
+
+COMMON DEF ROTATEAXISQ O[],R,AX[]
+ VAR HR=R*0.5
+ 'ARYOP #AOPMUL O,AX,SIN(HR)
+ VAR S=SIN(HR):O[_X]=AX[_X]*S:O[_Y]=AX[_Y]*S:O[_Z]=AX[_Z]*S
+ 'O[#W]=COS(HR)
+ O[_W]=COS(HR)
+END
+
+COMMON DEF PERSPECTIVE O[],FOV,ASP,N,F
+ VAR COT=1/TAN(FOV/2)
+ VAR R=F/(N-F)
+ O[0,0]= COT/ASP
+ O[0,1]= 0
+ O[0,2]= 0
+ O[0,3]= 0
+ O[1,0]= 0
+ O[1,1]= COT
+ O[1,2]= 0
+ O[1,3]= 0
+ O[2,0]= 0
+ O[2,1]= 0
+ O[2,2]= R
+ O[2,3]=-1
+ O[3,0]= 0
+ O[3,1]= 0
+ O[3,2]= N*R
+ O[3,3]= 0
 END
 
 COMMON DEF LOOKAT O[],POS[],TAG[],UP[]
@@ -460,7 +521,7 @@ COMMON DEF LOOKAT O[],POS[],TAG[],UP[]
  VAR I%:FOR I%=0 TO LEN(F)-1 F[I%]=TAG[I%]-POS[I%] NEXT
  NORMALIZE F,F
  VAR S[LEN(POS)]
- CROSS S,FWD,UP
+ CROSS S,F,UP
  NORMALIZE S,S
  VAR U[LEN(POS)]
  CROSS U,S,F
@@ -491,43 +552,17 @@ COMMON DEF LOOKAT O[],POS[],TAG[],UP[]
  O[3,3]= 1
 END
 
-COMMON DEF PERSPECTIVE O[],FOV,ASP,N,F
- VAR COT=1/TAN(FOV/2)
- VAR R=F/(N-F)
- O[0,0]= COT/ASP
- O[0,1]= 0
- O[0,2]= 0
- O[0,3]= 0
- O[1,0]= 0
- O[1,1]= COT
- O[1,2]= 0
- O[1,3]= 0
- O[2,0]= 0
- O[2,1]= 0
- O[2,2]= R
- O[2,3]=-1
- O[3,0]= 0
- O[3,1]= 0
- O[3,2]= N*R
- O[3,3]= 0
-END
-
 COMMON DEF VIEWPORT O[],X,Y,W,H,N,F
  VAR W2=W/2
  VAR H2=H/2
- VAR NF=F-N
+ VAR FN=F-N
+
  ' GL
- O[1,1]=H2
- O[2,2]=FN/2
- O[3,2]=(N+F)/2
+ 'O[1,1]=H2:O[2,2]=FN/2:O[3,2]=(N+F)/2
  ' DX
- 'O[1,1]=-H2
- 'O[2,2]= FN
- 'O[3,2]= N
+ O[1,1]=-H2:O[2,2]=FN:O[3,2]=N
 
  O[0,0]=W2
- O[3,0]=X+W2
- O[3,1]=Y+H2
  O[0,1]=0
  O[0,2]=0
  O[0,3]=0
@@ -537,7 +572,69 @@ COMMON DEF VIEWPORT O[],X,Y,W,H,N,F
  O[2,0]=0
  O[2,1]=0
  O[2,3]=0
+ O[3,0]=X+W2
+ O[3,1]=Y+H2
  O[3,3]=1
 END
 
-'TODO QUAT
+COMMON DEF CONJUGATE O[],Q[]
+ 'O[#X]=-Q[#X]:O[#Y]=-Q[#Y]:O[#Z]=-Q[#Z]:O[#W]=Q[#W]
+ O[_X]=-Q[_X]:O[_Y]=-Q[_Y]:O[_Z]=-Q[_Z]:O[_W]=Q[_W]
+END
+
+COMMON DEF FROMPITCHYAWROLL O[],P,Y,R
+ VAR HP=P*0.5
+ VAR HY=Y*0.5
+ VAR HR=R*0.5
+ VAR C[3]'=[COS(HP),COS(HY),COS(HR)]
+ C[_X]=COS(HP):C[_Y]=COS(HY):C[_Z]=COS(HR)
+ VAR S[3]'=[SIN(HP),SIN(HY),SIN(HR)]
+ S[_X]=SIN(HP):S[_Y]=SIN(HY):S[_Z]=SIN(HR)
+ 'O[#X]=S[#X]*C[#Y]*C[#Z]-C[#X]*S[#Y]*S[#Z]
+ 'O[#Y]=C[#X]*S[#Y]*C[#Z]+S[#X]*C[#Y]*S[#Z]
+ 'O[#Z]=C[#X]*C[#Y]*S[#Z]-S[#X]*S[#Y]*C[#Z]
+ 'O[#W]=C[#X]*C[#Y]*C[#Z]+S[#X]*S[#Y]*S[#Z]
+ O[_X]=S[_X]*C[_Y]*C[_Z]-C[_X]*S[_Y]*S[_Z]
+ O[_Y]=C[_X]*S[_Y]*C[_Z]+S[_X]*C[_Y]*S[_Z]
+ O[_Z]=C[_X]*C[_Y]*S[_Z]-S[_X]*S[_Y]*C[_Z]
+ O[_W]=C[_X]*C[_Y]*C[_Z]+S[_X]*S[_Y]*S[_Z]
+END
+
+COMMON DEF FROM2VEC O[],U[],V[]
+ VAR U2V2=DOT(U,U) * DOT(V,V)
+ VAR RP=U2V2+DOT(U,V)
+ 'IF RP<#EPSILON*U2V2 THEN
+ IF RP<_EPSILON*U2V2 THEN
+  'IF ABS(U[#X]>U[#Z]) THEN
+  IF ABS(U[_X]>U[_Z]) THEN 
+   'O[#X]=-U[#Y]:O[#Y]=U[#X]:O[#Z]=0:O[#W]=0
+   O[_X]=-U[_Y]:O[_Y]=U[_X]:O[_Z]=0:O[_W]=0
+ ELSE
+   'O[#X]=0:O[#Y]=-U[#Z]:O[#Z]=U[#Y]:O[#W]=0
+   O[_X]=0:O[_Y]=-U[_Z]:O[_Z]=U[_Y]:O[_W]=0
+  ENDIF
+ ELSE
+  CROSS O,U,V
+  'O[#W]=RP
+  O[_W]=RP
+ ENDIF
+ NORMALIZE O,O
+END
+
+COMMON DEF TOAXISANGLE O[],Q[]
+ 'COPY O,0,Q,0,3:O[#W]=0
+ COPY O,0,Q,0,3:O[_W]=0
+ NORMALIZE O,O
+ 'O[#W]=2*ACOS(Q[#W])
+ O[_W]=2*ACOS(Q[_W])
+END
+
+COMMON DEF SLERP O[],L[],R[],T
+'TODO
+END
+COMMON DEF TOMAT O[],Q[]
+ 'TODO
+END
+COMMON DEF TOQUAT O[],M[]
+ 'TODO
+END
