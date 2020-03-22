@@ -313,6 +313,17 @@ DEF VERIFY_QUAT
  '??C
  ?C[0],C[1],C[2],C[3]
 
+ VAR M3[3,3]
+ TOMAT M3,A
+ ?"TOMAT=";
+ '??M3
+ ?M3[0,0],M3[0,1],M3[0,2],M3[1,0],M3[1,1],M3[1,2],M3[2,0],M3[2,1],M3[2,2]
+
+ TOQUAT A,M3
+ ?"TOQUAT=";
+ '??A
+ ?A[0],A[1],A[2],A[3]
+
  VAR D[4]
  MULTIPLYQ D,C,A
  '??D

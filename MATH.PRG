@@ -632,9 +632,66 @@ END
 COMMON DEF SLERP O[],L[],R[],T
 'TODO
 END
+
 COMMON DEF TOMAT O[],Q[]
- 'TODO
+'VAR XX=Q[#X]*Q[#X]
+ 'VAR YY=Q[#Y]*Q[#Y]
+ 'VAR ZZ=Q[#Z]*Q[#Z]
+ 'VAR XY=Q[#X]*Q[#Y]
+ 'VAR XZ=Q[#X]*Q[#Z]
+ 'VAR YZ=Q[#Y]*Q[#Z]
+ 'VAR WX=Q[#W]*Q[#X]
+ 'VAR WY=Q[#W]*Q[#Y]
+ 'VAR WZ=Q[#W]*Q[#Z]
+ VAR XX=Q[_X]*Q[_X]
+ VAR YY=Q[_Y]*Q[_Y]
+ VAR ZZ=Q[_Z]*Q[_Z]
+ VAR XY=Q[_X]*Q[_Y]
+ VAR XZ=Q[_X]*Q[_Z]
+ VAR YZ=Q[_Y]*Q[_Z]
+ VAR WX=Q[_W]*Q[_X]
+ VAR WY=Q[_W]*Q[_Y]
+ VAR WZ=Q[_W]*Q[_Z]
+ O[0,0]=1-2*(YY+ZZ)
+ O[0,1]=2*(XY+WZ)
+ O[0,2]=2*(XZ-WY)
+ O[1,0]=2*(XY-WZ)
+ O[1,1]=1-2*(XX+ZZ)
+ O[1,2]=2*(YZ+WX)
+ O[2,0]=2*(XZ+WY)
+ O[2,1]=2*(YZ-WX)
+ O[2,2]=1-2*(XX+YY)
 END
+
+' TODO
 COMMON DEF TOQUAT O[],M[]
- 'TODO
+ VAR A=M[0,0]-M[1,1]-M[2,2]
+ VAR B=M[1,1]-M[0,0]-M[2,2]
+ VAR C=M[2,2]-M[0,0]-M[1,1]
+ VAR D=M[0,0]+M[1,1]+M[2,2]
+ VAR BIG=0
+ VAR BIG%=0
+ IF A>BIG THEN
+  BIG=A:BIG%=1
+ ENDIF
+ IF B>BIG THEN
+  BIG=B:BIG%=2
+ ENDIF
+ IF C>BIG THEN
+  BIG=C:BIG%=3
+ ENDIF
+ BIG=SQR((BIG+1)*0.5)
+ VAR MUL=0.25/BIG
+ A=MUL*(M[0,1]-M[1,0])
+ B=MUL*(M[1,2]-M[2,1])
+ C=MUL*(M[2,0]-M[0,2])
+ IF 0==BIG% THEN
+  O[_X]=BIG:O[_Y]=B:O[_Z]=C:O[_W]=A
+ ELSEIF 1==BIG% THEN
+  O[_X]=B:O[_Y]=BIG:O[_Z]=A:O[_W]=C
+ ELSEIF 2==BIG% THEN
+  O[_X]=C:O[_Y]=A:O[_Z]=BIG:O[_W]=B
+ ELSE
+  O[_X]=A:O[_Y]=C:O[_Z]=B:O[_W]=BIG
+ ENDIF
 END
