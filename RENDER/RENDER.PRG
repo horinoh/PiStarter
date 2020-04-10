@@ -122,7 +122,7 @@ COMMON DEF SPPOLY_DRAW
  A[_X]=SPVAR(I%,_X0):A[_Y]=SPVAR(I%,_Y0)
  B[_X]=SPVAR(I%,_X1):B[_Y]=SPVAR(I%,_Y1)
  C[_X]=SPVAR(I%,_X2):C[_Y]=SPVAR(I%,_Y2)
- N[_X]=SPVAR(I%,_NX)*2-1:N[_Y]=SPVAR(I%,_NY)*2-1
+ N[_X]=SPVAR(I%,_NX):N[_Y]=SPVAR(I%,_NY)
 
  '3 EDGES : AB,BC,CA
  VAR AB[2],BC[2],CA[2]
@@ -189,14 +189,19 @@ COMMON DEF SPPOLY_DRAW
   ELSE
    SPCOLOR I%,RGB(127,255,0,255)
   ENDIF
+  
+  VAR Z=MAX(SPVAR(I%,_NX),0)
+  SPCOLOR I%,RGB(200,Z*255,Z*255,Z*255)
 
-  VAR NZ=1-DOT(N,N)
-  IF NZ>=0 THEN 
-    NZ=SQR(NZ)
-    'SPCOLOR I%,RGB(200,(N[_X]*0.5+0.5)*255,(N[_Y]*0.5+0.5)*255,(NZ*0.5+0.5)*255)
-  ENDIF
+  'VAR NZ=1-DOT(N,N)
+  'IF NZ>=0 THEN 
+  '  NZ=SQR(NZ)
+  '  SPCOLOR I%,RGB(255,(N[_X]*0.5+0.5)*255,(N[_Y]*0.5+0.5)*255,(NZ*0.5+0.5)*255)
+  'ENDIF
 
   SPSHOW I%
+
+  'WAIT 20
 
   'GTRI A[_X],A[_Y],B[_X],B[_Y],C[_X],C[_Y],#GREEN 'ALPHA MUST BE 255
   'GLINE A[_X],A[_Y],B[_X],B[_Y],#WHITE:GLINE B[_X],B[_Y],C[_X],C[_Y],#WHITE:GLINE C[_X],C[_Y],A[_X],A[_Y],#WHITE
@@ -307,39 +312,57 @@ COMMON DEF SPPOLY_TRANSFORM4 O[],VB[],M[]
 END
 
 COMMON DEF SPPOLY_DRAW_INDEXED IB%[],VB[],NB[]
- VAR I%
- VAR J%=0
+ VAR I%,J%
+ VAR ZS[0]
+ VAR AS%[0],BS%[0],CS%[0]
  FOR I%=0 TO LEN(IB%)-1 STEP 3
-  VAR I0%=IB%[I%+0]*3
-  VAR I1%=IB%[I%+1]*3
-  VAR I2%=IB%[I%+2]*3
-
-  VAR A[3]'=[VB[I0%+#X],VB[I0%+#Y],VB[I0%+#Z]]
-  VAR B[3]'=[VB[I1%+#X],VB[I1%+#Y],VB[I1%+#Z]]
-  VAR C[3]'=[VB[I2%+#X],VB[I2%+#Y],VB[I2%+#Z]]
-  VAR N[3]'=[(NB[I0%+#X]+NB[I1%+#X]+NB[I2%+#X])/3,(NB[I0%+#Y]+NB[I1%+#Y]+NB[I2%+#Y])/3,(NB[I0%+#Z]+NB[I1%+#Z]+NB[I2%+#Z])/3]
-  A[_X]=VB[I0%+_X]:A[_Y]=VB[I0%+_Y]:A[_Z]=VB[I0%+_Z]
-  B[_X]=VB[I1%+_X]:B[_Y]=VB[I1%+_Y]:B[_Z]=VB[I1%+_Z]
-  C[_X]=VB[I2%+_X]:C[_Y]=VB[I2%+_Y]:C[_Z]=VB[I2%+_Z]
-  N[_X]=(NB[I0%+_X]+NB[I1%+_X]+NB[I2%+_X])/3
-  N[_Y]=(NB[I0%+_Y]+NB[I1%+_Y]+NB[I2%+_Y])/3
-  N[_Z]=(NB[I0%+_Z]+NB[I1%+_Z]+NB[I2%+_Z])/3
-  NORMALIZE N,N
-  'ARYOP #AOPMAD N,0.5,0.5
-  N[_X]=N[_X]*0.5+0.5:N[_Y]=N[_Y]*0.5+0.5:N[_Z]=N[_Z]*0.5+0.5
-
+  VAR A%=IB%[I%+0]*3
+  VAR B%=IB%[I%+1]*3
+  VAR C%=IB%[I%+2]*3
+  VAR A[3]'=[VB[A%+#X],VB[A%+#Y],VB[A%+#Z]]
+  VAR B[3]'=[VB[B%+#X],VB[B%+#Y],VB[B%+#Z]]
+  VAR C[3]'=[VB[C%+#X],VB[C%+#Y],VB[C%+#Z]]
+  A[_X]=VB[A%+_X]:A[_Y]=VB[A%+_Y]:A[_Z]=VB[A%+_Z]
+  B[_X]=VB[B%+_X]:B[_Y]=VB[B%+_Y]:B[_Z]=VB[B%+_Z]
+  C[_X]=VB[C%+_X]:C[_Y]=VB[C%+_Y]:C[_Z]=VB[C%+_Z]
+  
   'CULL FACE
   VAR AB[3]
   'ARYOP #AOPSUB AB,B,A
-  VAR K%
-  FOR K%=0 TO LEN(AB)-1 AB[K%]=B[K%]-A[K%] NEXT
+  FOR J%=0 TO LEN(AB)-1 AB[J%]=B[J%]-A[J%] NEXT
   VAR AC[3]
   'ARYOP #AOPSUB AC,C,A
-  FOR K%=0 TO LEN(AC)-1 AC[K%]=C[K%]-A[K%] NEXT
+  FOR J%=0 TO LEN(AC)-1 AC[J%]=C[J%]-A[J%] NEXT
   VAR DIR[3]
   CROSS DIR,AB,AC
-  'IF DIR[#Z]>=0 THEN RETURN ENDIF
-  IF DIR[_Z]>=0 THEN RETURN ENDIF
+  'IF DIR[#Z]<0 THEN
+  IF DIR[_Z]<0 THEN
+   'PUSH ZS,A[#Z]+B[#Z]+C[#Z]
+   PUSH ZS,A[_Z]+B[_Z]+C[_Z]
+   PUSH AS%,A%
+   PUSH BS%,B%
+   PUSH CS%,C%
+  ENDIF
+ NEXT
+
+ 'SORT BY Z
+ SORT ZS,AS%,BS%,CS%
+
+ J%=0
+ FOR I%=0 TO LEN(AS%)-1
+  A%=AS%[I%]
+  B%=BS%[I%]
+  C%=CS%[I%]
+  'VAR A[3]'=[VB[A%+#X],VB[A%+#Y],VB[A%+#Z]]
+  'VAR B[3]'=[VB[B%+#X],VB[B%+#Y],VB[B%+#Z]]
+  'VAR C[3]'=[VB[C%+#X],VB[C%+#Y],VB[C%+#Z]]
+  A[_X]=VB[A%+_X]:A[_Y]=VB[A%+_Y]:A[_Z]=VB[A%+_Z]
+  B[_X]=VB[B%+_X]:B[_Y]=VB[B%+_Y]:B[_Z]=VB[B%+_Z]
+  C[_X]=VB[C%+_X]:C[_Y]=VB[C%+_Y]:C[_Z]=VB[C%+_Z]
+  VAR N[3]'=[NB[A%+#X]+NB[B%+#X]+NB[C%+#X],NB[A%+#Y]+NB[B%+#Y]+NB[C%+#Y],NB[A%+#Z]+NB[B%+#Z]+NB[C%+#Z]]
+  'ARYOP #AOPDIV N,3
+  N[_X]=(NB[A%+_X]+NB[B%+_X]+NB[C%+_X])/3:N[_Y]=(NB[A%+_Y]+NB[B%+_Y]+NB[C%+_Y])/3:N[_Z]=(NB[A%+_Z]+NB[B%+_Z]+NB[C%+_Z])/3
+  NORMALIZE N,N
 
   'SPVAR J%,#X0,A[#X]:SPVAR J%,#Y0,A[#Y]
   'SPVAR J%,#X1,B[#X]:SPVAR J%,#Y1,B[#Y]
@@ -349,6 +372,7 @@ COMMON DEF SPPOLY_DRAW_INDEXED IB%[],VB[],NB[]
   SPVAR J%,_X1,B[_X]:SPVAR J%,_Y1,B[_Y]
   SPVAR J%,_X2,C[_X]:SPVAR J%,_Y2,C[_Y]
   SPVAR J%,_NX,N[_X]:SPVAR J%,_NY,N[_Y]
+  SPVAR J%,_NX,(A[_Z]+B[_Z]+C[_Z])/3
   INC J%
   'IF J%>4095 THEN ?"SPRITE OVERFLOW":?J%:RETURN ENDIF
   IF J%>511 THEN ?"SPRITE OVERFLOW":?J%:RETURN ENDIF
@@ -389,4 +413,46 @@ COMMON DEF SPPOLY_SPHERE O[],UV[]
  PUSH O,COS(UV[_X])*SIN(UV[_Y])
  PUSH O,SIN(UV[_X])*SIN(UV[_Y])
  PUSH O,COS(UV[_Y])
+END
+
+COMMON DEF SPPOLY_CONE O[],UV[]
+ 'UV[#X]=FRAC(UV[#X])*2*#PI
+ 'UV[#Y]=FRAC(UV[#Y])
+  UV[_X]=FRAC(UV[_X])*2*PI()
+  UV[_Y]=FRAC(UV[_Y])
+  'VAR R=1*(1-UV[#Y])
+  VAR R=1*(1-UV[_Y])
+  VAR H=1
+  'PUSH O,R*COS(UV[#X])
+  'PUSH O,H*UV[#Y]
+  'PUSH O,R*SIN(UV[#X])
+  PUSH O,R*COS(UV[_X])
+  PUSH O,H*UV[_Y]
+  PUSH O,R*SIN(UV[_X])
+END
+
+COMMON DEF SPPOLY_PILLOW O[],UV[]
+ 'UV[#X]=FRAC(UV[#X])*2*#PI
+ 'UV[#Y]=(-FRAC(UV[#Y])+1)*2*#PI
+ UV[_X]=FRAC(UV[_X])*2*PI()
+ UV[_Y]=(-FRAC(UV[_Y])+1)*2*PI()
+ 'PUSH O,COS(UV[#X])
+ 'PUSH O,COS(UV[#Y])
+ 'PUSH O,0.5*SIN(UV[#X])+SIN(UV[#Y])
+  PUSH O,COS(UV[_X])
+  PUSH O,COS(UV[_Y])
+  PUSH O,0.5*SIN(UV[_X])+SIN(UV[_Y])
+END
+
+COMMON DEF SPPOLY_SNAIL O[],UV[]
+ 'UV[#X]=FRAC(UV[#X])*2*#PI
+ 'UV[#Y]=(-FRAC(UV[#Y])+0.5)*2*#PI
+  UV[_X]=FRAC(UV[_X])*2*PI()
+  UV[_Y]=(-FRAC(UV[_Y])+0.5)*2*PI()
+ 'PUSH O,0.2*UV[#X]*COS(UV[#Y])*SIN(UV[#X])
+ 'PUSH O,0.2*UV[#X]*COS(UV[#X])*COS(UV[#Y])
+ 'PUSH O,-0.2*UV[#X]*SIN(UV[#Y])
+  PUSH O,0.2*UV[_X]*COS(UV[_Y])*SIN(UV[_X])
+  PUSH O,0.2*UV[_X]*COS(UV[_X])*COS(UV[_Y])
+  PUSH O,-0.2*UV[_X]*SIN(UV[_Y])
 END
